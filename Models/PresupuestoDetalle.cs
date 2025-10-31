@@ -1,22 +1,19 @@
-namespace Models
+namespace tl2_tp8_2025_slackku.Models;
+
+public class PresupuestoDetalle
 {
-    public class PresupuestoDetalle
+    private Producto _producto;
+    private int _cantidad;
+
+    public Producto Producto
     {
-        private Producto _producto;
-        private int _cantidad;
-
-        public Producto Producto
-        {
-            get { return _producto; }
-            set { _producto = value; }
-        }
-
-        public int Cantidad
-        {
-            get { return _cantidad; }
-            set { _cantidad = value; }
-        }
+        get { return _producto; }
+        set { _producto = value; }
     }
 
-
+    public int Cantidad
+    {
+        get { return _cantidad; }
+        set { _cantidad = value; }
+    }
 }

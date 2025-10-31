@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
-using Models;
+using tl2_tp8_2025_slackku.Models;
 
-namespace Repository
+namespace tl2_tp8_2025_slackku.Repository
 {
     public class PresupuestoRepository
     {
@@ -15,7 +15,7 @@ namespace Repository
             string queryStringPresupuesto = "INSERT INTO Presupuestos (NombreDestinatario, FechaCreacion) VALUES(@name, @date); SELECT last_insert_rowid();";
 
             var commandFirst = new SqliteCommand(queryStringPresupuesto, connection);
-            commandFirst.Transaction = transaction; 
+            commandFirst.Transaction = transaction;
 
             commandFirst.Parameters.AddWithValue("@name", presu.NombreDestinatario);
             commandFirst.Parameters.AddWithValue("@date", presu.FechaCreacion);

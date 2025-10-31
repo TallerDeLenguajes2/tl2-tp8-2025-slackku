@@ -1,8 +1,8 @@
 using Microsoft.Data.Sqlite;
-using Models;
+using tl2_tp8_2025_slackku.Models;
 using SQLitePCL;
 
-namespace Repository
+namespace tl2_tp8_2025_slackku.Repository
 {
     public class ProductoRepostitory
     {

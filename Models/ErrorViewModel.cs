@@ -1,4 +1,4 @@
-namespace asd.Models;
+namespace tl2_tp8_2025_slackku.Models;
 
 public class ErrorViewModel
 {
