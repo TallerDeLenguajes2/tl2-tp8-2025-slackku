@@ -4,9 +4,9 @@ using SQLitePCL;
 
 namespace tl2_tp8_2025_slackku.Repository
 {
-    public class ProductoRepostitory
+    public class ProductoRepository
     {
-        private string connectionString = "DataSource=Tienda.db;";
+        private string connectionString = "DataSource=DB/Tienda.db;";
         public bool Crear(Producto prod)
         {
             using var connection = new SqliteConnection(connectionString);
