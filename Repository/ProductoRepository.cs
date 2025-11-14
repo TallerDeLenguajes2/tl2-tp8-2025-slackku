@@ -26,14 +26,12 @@ namespace tl2_tp8_2025_slackku.Repository
             SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
 
-            // TODO: Verificar que se quiera editar un elemento ya existente primero
-
-            string queryString = "UPDATE Productos SET Descripcion = @des WHERE idProducto = @id"; // El punto pide solo cambiarle el nombre
+            string queryString = "UPDATE Productos SET Descripcion = @des, Precio = @price WHERE idProducto = @id"; // El punto pide solo cambiarle el nombre
             var command = new SqliteCommand(queryString, connection);
 
             command.Parameters.AddWithValue("@id", id);
             command.Parameters.AddWithValue("@des", pModified.Descripcion);
-            // command.Parameters.AddWithValue("@price", pModified.Precio);
+            command.Parameters.AddWithValue("@price", pModified.Precio);
 
             return command.ExecuteNonQuery() == 1;
         }
@@ -59,7 +57,7 @@ namespace tl2_tp8_2025_slackku.Repository
                 {
                     IdProducto = Convert.ToInt32(reader["idProducto"]),
                     Descripcion = reader["Descripcion"].ToString(),
-                    Precio = Convert.ToDouble(reader["Precio"]),
+                    Precio = Convert.ToDouble(reader["Precio"])
                 };
                 listaProductos.Add(producto);
             }

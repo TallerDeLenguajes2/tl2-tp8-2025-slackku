@@ -1,0 +1,18 @@
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+@model Producto
+
+<div>
+    <h5>Are you sure about that?</h5>
+     @using (Html.BeginForm("Delete", "Productos", FormMethod.Post)) {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => Model.IdProducto)
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a asp-controller="Productos" asp-action="Index" class="btn">Cancelar</a>
+        </div>
+    }
+</div>

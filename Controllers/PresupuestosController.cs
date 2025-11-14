@@ -4,12 +4,12 @@ using tl2_tp8_2025_slackku.Repository;
 
 namespace tl2_tp8_2025_slackku.Controllers
 {
-    public class PresupuestoController : Controller
+    public class PresupuestosController : Controller
     {
-        private readonly ILogger<PresupuestoController> _logger;
+        private readonly ILogger<PresupuestosController> _logger;
 
         private PresupuestoRepository presupuestoRepository;
-        public PresupuestoController(ILogger<PresupuestoController> logger)
+        public PresupuestosController(ILogger<PresupuestosController> logger)
         {
             _logger = logger;
             presupuestoRepository = new PresupuestoRepository();
@@ -27,6 +27,12 @@ namespace tl2_tp8_2025_slackku.Controllers
         {
             List<Presupuesto> presupuesto = presupuestoRepository.Listar();
             return View(presupuesto);
+        }
+
+        [HttpGet]
+        public IActionResult Details()
+        {
+            return View();
         }
 
     }

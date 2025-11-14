@@ -4,11 +4,11 @@ using tl2_tp8_2025_slackku.Repository;
 
 namespace tl2_tp8_2025_slackku.Controllers
 {
-    public class ProductoController : Controller
+    public class ProductosController : Controller
     {
-        private readonly ILogger<ProductoController> _logger;
+        private readonly ILogger<ProductosController> _logger;
         private ProductoRepository repository;
-        public ProductoController(ILogger<ProductoController> logger)
+        public ProductosController(ILogger<ProductosController> logger)
         {
             _logger = logger;
             repository = new ProductoRepository();
@@ -37,13 +37,36 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            return View();
+            Producto prod = repository.Obtener(id);
+            if (prod != null)
+                return View(prod);
+            // TODO: show an error msg, not found element
+            return RedirectToAction("Index");
         }
 
-        [HttpPut]
+        [HttpPost]
         public IActionResult Edit(int id, ProductoDTO modif)
         {
             repository.Modificar(id, modif);
+            // TODO: show a verification msg
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            Producto prod = repository.Obtener(id);
+            if (prod != null)
+                return View(prod);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmation(int id)
+        {
+            Producto prod = repository.Obtener(id);
+            if (prod != null)
+                repository.Eliminar(id);
             // TODO: show a verification msg
             return RedirectToAction("Index");
         }

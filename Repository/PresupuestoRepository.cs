@@ -5,8 +5,8 @@ namespace tl2_tp8_2025_slackku.Repository
 {
     public class PresupuestoRepository
     {
-        private string connectionString = "DataSource=Tienda.db;";
-        public bool Crear(Presupuesto presu) // El detalle del presupuesto se establece aqui
+        private string connectionString = "DataSource=DB/Tienda.db;";
+        public bool Crear(Presupuesto presu) // Recibimos un presupuesto [con carga del detalle dentro]
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
@@ -23,7 +23,6 @@ namespace tl2_tp8_2025_slackku.Repository
             var idPresupuestoGenerado = (long)commandFirst.ExecuteScalar();
 
             string queryStringPresupuestoDetalle = "INSERT INTO PresupuestosDetalle (idProducto, idPresupuesto, Cantidad) VALUES(@idProd, @idPresu, @cant)";
-
 
             int adderCheck = 0;
             presu.Detalle.ForEach(d =>
@@ -45,7 +44,8 @@ namespace tl2_tp8_2025_slackku.Repository
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
-            string queryString = "SELECT * FROM Presupuestos p INNER JOIN PresupuestosDetalle pd ON p.idPresupuesto = pd.idPresupuesto INNER JOIN Productos pr ON pd.idProducto = pr.idProducto";
+            string queryString = "SELECT * FROM Presupuestos";
+
             using var command = new SqliteCommand(queryString, connection);
 
             using var reader = command.ExecuteReader();
@@ -53,12 +53,11 @@ namespace tl2_tp8_2025_slackku.Repository
             return presupuestos;
         }
 
-        public List<Presupuesto> MapearPresupuestos(SqliteDataReader reader)
+        private List<Presupuesto> MapearPresupuestos(SqliteDataReader reader)
         {
             List<Presupuesto> listaPresupuesto = new();
             while (reader.Read())
             {
-                Console.WriteLine(reader.ToString());
                 var presupuesto = new Presupuesto
                 {
                     IdPresupuesto = Convert.ToInt32(reader["idPresupuesto"]),
@@ -66,21 +65,48 @@ namespace tl2_tp8_2025_slackku.Repository
                     FechaCreacion = Convert.ToDateTime(reader["FechaCreacion"]),
                     Detalle = new List<PresupuestoDetalle>()
                 };
-                presupuesto.Detalle.Add(new PresupuestoDetalle
-                {
-                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
-                    Producto = new Producto
-                    {
-                        IdProducto = Convert.ToInt32(reader["idProducto"]),
-                        Descripcion = reader["Descripcion"].ToString(),
-                        Precio = Convert.ToDouble(reader["Precio"])
-                    },
-                });
-
                 listaPresupuesto.Add(presupuesto);
             }
             return listaPresupuesto;
         }
+
+        public List<PresupuestoDetalle> ObtenerDetalle(int idPresupuesto)
+        {
+            using var connection = new SqliteConnection(connectionString);
+            connection.Open();
+            string queryString = "SELECT * FROM Presupuestos INNER JOIN PresupuestosDetalle USING(idPresupuesto) INNER JOIN Productos USING(idProducto)";
+
+            using var command = new SqliteCommand(queryString, connection);
+
+            using var reader = command.ExecuteReader();
+            var detalles = MapearDetalles(reader);
+            return detalles;
+        }
+
+        private List<PresupuestoDetalle> MapearDetalles(SqliteDataReader reader)
+        {
+            List<PresupuestoDetalle> listaDetalles = new();
+            while (reader.Read())
+            {
+                var prod = new Producto
+                {
+                    IdProducto = Convert.ToInt32(reader["idProducto"]),
+                    Descripcion = reader["Descripcion"].ToString(),
+                    Precio = Convert.ToDouble(reader["Precio"])
+                };
+
+
+                var presupuesto = new PresupuestoDetalle
+                {
+                    Producto = prod,
+                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
+                    IdPresupuesto = Convert.ToInt32(reader["IdPresupuesto"])
+                };
+                listaDetalles.Add(presupuesto);
+            }
+            return listaDetalles;
+        }
+
         public Presupuesto Obtener(int id)
         {
             using var connection = new SqliteConnection(connectionString);

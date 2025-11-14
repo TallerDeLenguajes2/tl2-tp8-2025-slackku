@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Listar Presupuestos";
+}
+@model List<Presupuesto>
+
+<div>
+    <a asp-controller="Presupuestos" asp-action="Create" class="btn btn-primary">Crear</a>
+</div>
+
+<div class="container mt-4">
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre Destinatario</th>
+                <th>Fecha</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Presupuesto pres in Model){
+                <tr>
+                    <th>@pres.NombreDestinatario</th>
+                    <th>@pres.FechaCreacion</th>
+                    <th>
+                        <a asp-controller="Presupuestos" asp-action="Details" asp-route-id="" class="btn btn-outline-success">Detalles</a>
+                    </th>
+                    <th>
+                        <a asp-controller="Presupuestos" asp-action="Edit" asp-route-id="" class="btn btn-outline-primary">Editar</a>
+                    </th>
+                    <th>
+                        <a asp-controller="Presupuestos" asp-action="Delete" asp-route-id="" class="btn btn-outline-danger">Eliminar</a>
+                    </th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
