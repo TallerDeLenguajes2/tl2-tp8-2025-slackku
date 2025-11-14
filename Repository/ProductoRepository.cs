@@ -7,7 +7,7 @@ namespace tl2_tp8_2025_slackku.Repository
     public class ProductoRepository
     {
         private string connectionString = "DataSource=DB/Tienda.db;";
-        public bool Crear(Producto prod)
+        public bool Crear(ProductoDTO prod)
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
@@ -21,10 +21,12 @@ namespace tl2_tp8_2025_slackku.Repository
             // connection.Close(); No hace falta por el using con connection, al salir del scope se cierra
             return command.ExecuteNonQuery() == 1;
         }
-        public bool Modificar(int id, Producto pModified)
+        public bool Modificar(int id, ProductoDTO pModified)
         {
             SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
+
+            // TODO: Verificar que se quiera editar un elemento ya existente primero
 
             string queryString = "UPDATE Productos SET Descripcion = @des WHERE idProducto = @id"; // El punto pide solo cambiarle el nombre
             var command = new SqliteCommand(queryString, connection);
@@ -35,6 +37,7 @@ namespace tl2_tp8_2025_slackku.Repository
 
             return command.ExecuteNonQuery() == 1;
         }
+        
         public List<Producto> Listar()
         {
             using var connection = new SqliteConnection(connectionString);

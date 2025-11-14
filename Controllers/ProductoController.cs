@@ -22,7 +22,7 @@ namespace tl2_tp8_2025_slackku.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Producto producto)
+        public IActionResult Create(ProductoDTO producto)
         {
             repository.Crear(producto);
             return RedirectToAction("Index");
@@ -32,6 +32,20 @@ namespace tl2_tp8_2025_slackku.Controllers
         public IActionResult Create()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            return View();
+        }
+
+        [HttpPut]
+        public IActionResult Edit(int id, ProductoDTO modif)
+        {
+            repository.Modificar(id, modif);
+            // TODO: show a verification msg
+            return RedirectToAction("Index");
         }
 
     }
