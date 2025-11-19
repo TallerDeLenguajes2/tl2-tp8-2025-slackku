@@ -4,7 +4,6 @@ public class PresupuestoDetalle
 {
     private Producto _producto;
     private int _cantidad;
-    private int _idPresupuesto;
 
     public Producto Producto
     {
@@ -18,9 +17,4 @@ public class PresupuestoDetalle
         set { _cantidad = value; }
     }
 
-    public int IdPresupuesto
-    {
-        get { return _idPresupuesto; }
-        set { _idPresupuesto = value; }
-    }
 }

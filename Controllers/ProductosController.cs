@@ -45,9 +45,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, ProductoDTO modif)
+        public IActionResult Edit(Producto modif)
         {
-            repository.Modificar(id, modif);
+            repository.Modificar(modif);
             // TODO: show a verification msg
             return RedirectToAction("Index");
         }
@@ -67,7 +67,6 @@ namespace tl2_tp8_2025_slackku.Controllers
             Producto prod = repository.Obtener(id);
             if (prod != null)
                 repository.Eliminar(id);
-            // TODO: show a verification msg
             return RedirectToAction("Index");
         }
 

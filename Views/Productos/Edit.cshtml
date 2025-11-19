@@ -4,17 +4,31 @@
 
 @model Producto
 
-<h5>Crear Producto</h5>
+<div class="d-flex flex-column p-3 mb-5">
+    <div class="container mt-2 p-4 border rounded shadow-sm">
+        <div class="d-flex flex-row gap-2 hstack">
+            <h3>Editar Producto</h3>
+        </div>
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IdProducto" asp-for="@Model.IdProducto">
+            <div class="card card-body mb-3 bg-light">
+                <div class="mb-3">
+                    <label asp-for="Descripcion" class="form-label fw-normal">Descripcion</label>
+                    <input class="form-control" asp-for="Descripcion" required>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Precio" class="form-label fw-normal">Precio unitario</label>
+                    <input type="number" min="0.01" step="any" class="form-control" asp-for="Precio" required>
+                </div>
+            </div>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="IdProducto" value="@Model.IdProducto">
-    <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre</label>
-        <input class="form-control" id="nombre" asp-for="Descripcion" value="@Model.Descripcion">
+            <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Guardar Cambios
+                </button>
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </a>
+            </div>
+        </form>
     </div>
-    <div class="mb-3">
-        <label for="precio" class="form-label">Precio</label>
-        <input class="form-control" id="precio" asp-for="Precio" value="@Model.Precio" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Confirmar</button>
-</form>

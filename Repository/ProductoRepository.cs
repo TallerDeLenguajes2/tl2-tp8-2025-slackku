@@ -21,7 +21,7 @@ namespace tl2_tp8_2025_slackku.Repository
             // connection.Close(); No hace falta por el using con connection, al salir del scope se cierra
             return command.ExecuteNonQuery() == 1;
         }
-        public bool Modificar(int id, ProductoDTO pModified)
+        public bool Modificar(Producto pModified)
         {
             SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
@@ -29,7 +29,7 @@ namespace tl2_tp8_2025_slackku.Repository
             string queryString = "UPDATE Productos SET Descripcion = @des, Precio = @price WHERE idProducto = @id"; // El punto pide solo cambiarle el nombre
             var command = new SqliteCommand(queryString, connection);
 
-            command.Parameters.AddWithValue("@id", id);
+            command.Parameters.AddWithValue("@id", pModified.IdProducto);
             command.Parameters.AddWithValue("@des", pModified.Descripcion);
             command.Parameters.AddWithValue("@price", pModified.Precio);
 

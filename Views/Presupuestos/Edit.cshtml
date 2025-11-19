@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Editar Presupuesto";
+    int cantElems = Model.Detalle.Count();
+}
+
+@model Presupuesto
+<div class="d-flex flex-column p-3 mb-5">
+    <div class="container mt-2 p-4 border rounded shadow-sm">
+        <div class="d-flex flex-row gap-2 hstack">
+            <h3>Editar Presupuesto</h3>
+            <div class="hstack gap-2 p-2">
+                <p class="text-secondary-emphasis m-0 bordertext-light fw-bold rounded p-1">
+                    @Model.NombreDestinatario</p>
+                <div class="vr"></div>
+                <p class="text-secondary m-0 ">@Model.FechaCreacion.ToString("dd/M/yyyy")</p>
+            </div>
+        </div>
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IdPresupuesto" />
+            @if (Model.Detalle != null && Model.Detalle.Any())
+            {
+                @for (int i = 0; i < Model.Detalle.Count; i++)
+                {
+                    <div class="card card-body mb-3 bg-light">
+
+                        <input type="hidden" asp-for="Detalle[i].Producto.IdProducto" />
+                        <input type="hidden" asp-for="Detalle[i].Producto.Descripcion" />
+                        <input type="hidden" asp-for="Detalle[i].Producto.Precio" />
+
+                        <div class="mb-3">
+                            <label asp-for="Detalle[i].Producto.Descripcion" class="form-label fw-normal">Producto</label>
+                            <input class="form-control" asp-for="Detalle[i].Producto.Descripcion" disabled>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Detalle[i].Cantidad" class="form-label fw-normal">Cantidad</label>
+                                <input type="number" class="form-control" asp-for="Detalle[i].Cantidad" min="1" required>
+                                <span asp-validation-for="Detalle[i].Cantidad" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Detalle[i].Producto.Precio" class="form-label fw-normal">Precio unitario</label>
+                                <input type="number" step="0.01" class="form-control" asp-for="Detalle[i].Producto.Precio"
+                                    disabled>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="alert alert-info">No hay detalles de productos para editar.</p>
+            }
+
+            <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Guardar Cambios
+                </button>
+                <a asp-controller="Presupuestos" asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
