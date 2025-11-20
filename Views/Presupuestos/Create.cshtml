@@ -10,69 +10,20 @@
         <form asp-action="Create" method="post">
             <input type="hidden" asp-for="IdPresupuesto" />
 
-            <div class="card card-body mb-3 bg-light">
+            <div class="card card-body mb-4 bg-light">
+                <h5 class="card-title text-secondary mb-3">Datos del Cliente</h5>
                 <div class="row">
                     <div class="mb-3 col-md-6">
                         <label asp-for="NombreDestinatario" class="form-label fw-normal">Nombre Destinatario</label>
                         <input class="form-control" asp-for="NombreDestinatario" required placeholder="Ej: Juan Pérez">
+                        <span asp-validation-for="NombreDestinatario" class="text-danger"></span>
                     </div>
                     <div class="mb-3 col-md-6">
                         <label asp-for="FechaCreacion" class="form-label fw-normal">Fecha Creacion</label>
                         <input class="form-control" type="date" asp-for="FechaCreacion"
                             value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                        <span asp-validation-for="FechaCreacion" class="text-danger"></span>
                     </div>
-                </div>
-            </div>
-
-            <hr class="text-secondary">
-
-            <h5 class="card-title text-secondary">Agregar Productos</h5>
-            <div class="row align-items-end mb-3 p-3 border rounded bg-light-subtle">
-                <div class="col-md-5">
-                    <label class="form-label">Producto</label>
-                    <select class="form-select" id="selectProducto" onchange="actualizarPrecio()">
-                        <option value="" selected disabled>Seleccionar producto...</option>
-                        @if (ViewBag.Productos != null)
-                        {
-                            foreach (var prod in (List<Producto>)ViewBag.Productos)
-                            {
-                                <option value="@prod.IdProducto" data-precio="@prod.Precio" data-nombre="@prod.Descripcion">
-                                    @prod.Descripcion
-                                </option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Cantidad</label>
-                    <input type="number" class="form-control" id="inputCantidad" value="1" min="1">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Precio Unitario</label>
-                    <input type="text" class="form-control" id="inputPrecio" value="$ 0.00" disabled readonly>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-success w-100" onclick="agregarProducto()">
-                        <i class="bi bi-plus-lg"></i> Agregar
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-responsive mb-3">
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col" style="width: 50%">Descripción</th>
-                            <th scope="col" style="width: 20%">Cantidad</th>
-                            <th scope="col" style="width: 20%">Subtotal</th>
-                            <th scope="col" style="width: 10%" class="text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-productos">
-                    </tbody>
-                </table>
-                <div id="mensajeVacio" class="text-center text-muted p-3">
-                    No hay productos agregados aún.
                 </div>
             </div>
 
@@ -87,94 +38,3 @@
         </form>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Índice para manejar la lista Detalle[0], Detalle[1], etc.
-        let indiceDetalle = 0;
-
-        function actualizarPrecio() {
-            var select = document.getElementById("selectProducto");
-            var inputPrecio = document.getElementById("inputPrecio");
-
-            // Verificar que haya una opción seleccionada válida
-            if (select.selectedIndex > 0) {
-                var opcion = select.options[select.selectedIndex];
-                var precio = opcion.getAttribute("data-precio");
-                inputPrecio.value = precio ? "$ " + precio : "$ 0.00";
-            } else {
-                inputPrecio.value = "$ 0.00";
-            }
-        }
-
-        function agregarProducto() {
-            // 1. Obtener elementos
-            var select = document.getElementById("selectProducto");
-            var inputCant = document.getElementById("inputCantidad");
-            var tabla = document.getElementById("tbody-productos");
-            var msgVacio = document.getElementById("mensajeVacio");
-
-            // 2. Validaciones
-            if (select.value == "") {
-                alert("Debes seleccionar un producto");
-                return;
-            }
-            if (inputCant.value < 1) {
-                alert("La cantidad debe ser mayor a 0");
-                return;
-            }
-
-            // 3. Obtener datos
-            var opcion = select.options[select.selectedIndex];
-            var idProducto = select.value;
-            var nombreProd = opcion.getAttribute("data-nombre");
-            var precio = parseFloat(opcion.getAttribute("data-precio"));
-            var cantidad = parseInt(inputCant.value);
-            var subtotal = precio * cantidad;
-
-            // 4. Crear fila HTML con los inputs ocultos necesarios para ASP.NET
-            var filaHtml = `
-                    <tr id="fila_${indiceDetalle}">
-                        <td>
-                            <input type="hidden" name="Detalle[${indiceDetalle}].Producto.IdProducto" value="${idProducto}" />
-                            ${nombreProd}
-                        </td>
-                        <td>
-                            <input type="hidden" name="Detalle[${indiceDetalle}].Cantidad" value="${cantidad}" />
-                            ${cantidad}
-                        </td>
-                        <td>
-                            $ ${subtotal.toFixed(2)}
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarFila(${indiceDetalle})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-
-            // 5. Insertar fila
-            tabla.insertAdjacentHTML('beforeend', filaHtml);
-
-            // 6. Limpiar formulario y ocultar mensaje
-            msgVacio.style.display = 'none';
-            select.value = "";
-            inputCant.value = 1;
-            document.getElementById("inputPrecio").value = "$ 0.00";
-            indiceDetalle++;
-        }
-
-        function eliminarFila(indice) {
-            var fila = document.getElementById("fila_" + indice);
-            if (fila) {
-                fila.remove();
-                // Si nos quedamos sin filas, mostrar el mensaje de nuevo
-                var tabla = document.getElementById("tbody-productos");
-                if (tabla.children.length === 0) {
-                    document.getElementById("mensajeVacio").style.display = 'block';
-                }
-            }
-        }
-    </script>
-}

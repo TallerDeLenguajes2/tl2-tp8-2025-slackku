@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using tl2_tp8_2025_slackku.Models;
 using tl2_tp8_2025_slackku.Repository;
+using tl2_tp8_2025_slackku.ViewModels;
 
 namespace tl2_tp8_2025_slackku.Controllers
 {
@@ -21,18 +22,30 @@ namespace tl2_tp8_2025_slackku.Controllers
             return View(productos);
         }
 
-        [HttpPost]
-        public IActionResult Create(ProductoDTO producto)
-        {
-            repository.Crear(producto);
-            return RedirectToAction("Index");
-        }
-
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
+        [HttpPost]
+        public IActionResult Create(ProductoViewModel productoVM)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(productoVM);
+            }
+
+            var nuevoProducto = new Producto
+            {
+                Descripcion = productoVM.Descripcion,
+                Precio = productoVM.Precio
+            };
+
+            repository.Crear(nuevoProducto);
+            return RedirectToAction(nameof(Index));
+        }
+
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -40,16 +53,26 @@ namespace tl2_tp8_2025_slackku.Controllers
             Producto prod = repository.Obtener(id);
             if (prod != null)
                 return View(prod);
-            // TODO: show an error msg, not found element
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult Edit(Producto modif)
+        public IActionResult Edit(int id, ProductoViewModel productoVM)
         {
-            repository.Modificar(modif);
-            // TODO: show a verification msg
-            return RedirectToAction("Index");
+            if (id != productoVM.IdProducto) return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(productoVM);
+
+            var productoAEditar = new Producto
+            {
+                IdProducto = productoVM.IdProducto, // Necesario para el UPDATE
+                Descripcion = productoVM.Descripcion,
+                Precio = productoVM.Precio
+            };
+
+            repository.Modificar(productoAEditar);
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]

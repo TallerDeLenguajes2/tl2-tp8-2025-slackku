@@ -6,69 +6,75 @@
 }
 @model List<Presupuesto>
 
-<div class="d-flex flex-row hstack">
-    <h2>Portal de Presupuestos</h2>
-    <a asp-controller="Presupuestos" asp-action="Create" class="btn btn-primary m-2 shadow-sm">Crear Presupuesto</a>
-</div>
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Portal de Presupuestos</h2>
+        <a asp-controller="Presupuestos" asp-action="Create" class="btn btn-primary m-2 shadow-sm">
+            <i class="bi bi-plus-lg"></i> Crear Presupuesto
+        </a>
+    </div>
 
-<div class="shadow-sm p-3 mb-5 bg-light-subtle rounded">
-    @foreach (Presupuesto pres in Model)
-    {
+    <div class="shadow-sm p-3 mb-5 bg-light-subtle rounded">
+        @foreach (Presupuesto pres in Model)
         {
-            bordeColor = "border" + coloresBorde[index % coloresBorde.Length];
-            fondoColor = "bg" + coloresBorde[index % coloresBorde.Length];
-            index++;
-        }
-        <div class="d-flex flex-row gap-2 hstack">
-            <h3>Presupuesto</h3>
-            <div class="hstack gap-2 p-2">
-                <p class="text-secondary-emphasis m-0 border @bordeColor @fondoColor text-light fw-bold rounded p-1">
-                    @pres.NombreDestinatario</p>
-                <div class="vr"></div>
-                <p class="text-secondary m-0 ">@pres.FechaCreacion.ToString("dd/M/yyyy")</p>
+            {
+                bordeColor = "border" + coloresBorde[index % coloresBorde.Length];
+                fondoColor = "bg" + coloresBorde[index % coloresBorde.Length];
+                index++;
+            }
+            <div class="d-flex flex-row gap-2 hstack">
+                <h3>Presupuesto</h3>
+                <div class="hstack gap-2 p-2">
+                    <p class="text-secondary-emphasis m-0 border @bordeColor @fondoColor text-light fw-bold rounded p-1">
+                        @pres.NombreDestinatario</p>
+                    <div class="vr"></div>
+                    <p class="text-secondary m-0 ">@pres.FechaCreacion.ToString("dd/M/yyyy")</p>
+                </div>
+                <a asp-controller="Presupuestos" asp-action="Edit" asp-route-id="@pres.IdPresupuesto"
+                    class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+                    <i class="bi bi-pencil-square"></i> Editar
+                </a>
+                <a asp-controller="Presupuestos" asp-action="Delete" asp-route-id="@pres.IdPresupuesto"
+                    class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
+                    <i class="bi bi-trash"></i> Eliminar
+                </a>
             </div>
-            <a asp-controller="Presupuestos" asp-action="Edit" asp-route-id="@pres.IdPresupuesto"
-                class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
-                <i class="bi bi-pencil-square"></i> Editar
-            </a>
-            <a asp-controller="Presupuestos" asp-action="Delete" asp-route-id="@pres.IdPresupuesto"
-                class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
-                <i class="bi bi-trash"></i> Eliminar
-            </a>
-        </div>
-        <div class="border-start @bordeColor border-5 rounded-3">
-            <table class="table table-bordered mb-0 ">
-                <thead>
-                    <tr class="text-muted">
-                        <th scope="col"></th>
-                        <th scope="col" class="fw-normal">Productos</th>
-                        <th scope="col" class="fw-normal">Cantidad</th>
-                        <th scope="col" class="fw-normal">Precio unit.</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    @foreach (PresupuestoDetalle det in pres.Detalle)
-                    {
-                        <tr>
-                            <th scope="row"></th>
-                            <td class="fw-bold">@det.Producto.Descripcion</td>
-                            <td>@det.Cantidad</td>
-                            <td>@det.Producto.Precio</td>
+            <div class="border-start @bordeColor border-5 rounded-3">
+                <table class="table table-bordered mb-0 ">
+                    <thead>
+                        <tr class="text-muted">
+                            <th scope="col"></th>
+                            <th scope="col" class="fw-normal">Productos</th>
+                            <th scope="col" class="fw-normal">Cantidad</th>
+                            <th scope="col" class="fw-normal">Precio unit.</th>
                         </tr>
-                    }
-                    <tr>
-                        <td></td>
-                        <td colspan="4" class="p-0">
-                            <a asp-controller="Presupuestos" asp-action="AddProd" asp-route-id="@pres.IdPresupuesto" class="btn btn-link text-decoration-none w-100 text-muted text-start ps-2 py-2"
-                                type="button">
-                                <i class="bi bi-plus me-2"></i>Agregar Producto
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <hr>
-    }
+                    </thead>
+                    <tbody>
+
+                        @foreach (PresupuestoDetalle det in pres.Detalle)
+                        {
+                            <tr>
+                                <th scope="row"></th>
+                                <td class="fw-bold">@det.Producto.Descripcion</td>
+                                <td>@det.Cantidad</td>
+                                <td>@det.Producto.Precio</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td></td>
+                            <td colspan="4" class="p-0">
+                                <a asp-controller="Presupuestos" asp-action="AgregarProducto"
+                                    asp-route-id="@pres.IdPresupuesto"
+                                    class="btn btn-link text-decoration-none w-100 text-muted text-start ps-2 py-2"
+                                    type="button">
+                                    <i class="bi bi-plus me-2"></i>Agregar Producto
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+        }
+    </div>
 </div>

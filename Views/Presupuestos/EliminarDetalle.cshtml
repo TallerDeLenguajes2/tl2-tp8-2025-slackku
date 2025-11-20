@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Quitar Producto";
+    int idPresupuesto = (int)ViewBag.IdPresupuesto;
+}
+
+@model PresupuestoDetalle
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-sm border-danger" style="max-width: 600px; width: 100%;">
+        
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title m-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Quitar Producto del Presupuesto
+            </h5>
+        </div>
+        
+        <div class="card-body text-center">
+            <h4 class="mb-3">¿Deseas quitar este ítem?</h4>
+            
+            <div class="alert alert-light border p-3 d-inline-block text-start" style="min-width: 300px;">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-secondary">Producto:</dt>
+                    <dd class="col-sm-8 fw-bold">@Model.Producto.Descripcion</dd>
+
+                    <dt class="col-sm-4 text-secondary">Cantidad:</dt>
+                    <dd class="col-sm-8">@Model.Cantidad unidades</dd>
+
+                    <dt class="col-sm-4 text-secondary">Subtotal:</dt>
+                    <dd class="col-sm-8">$ @(Model.Producto.Precio * Model.Cantidad)</dd>
+                </dl>
+            </div>
+
+            <p class="text-muted mt-3">El producto se eliminará de este presupuesto, pero seguirá existiendo en el sistema.</p>
+
+            <form asp-action="EliminarDetalle" method="post" class="d-flex justify-content-center gap-2 mt-4">
+                <input type="hidden" name="idPresupuesto" value="@idPresupuesto" />
+                <input type="hidden" name="idProducto" value="@Model.Producto.IdProducto" />
+                
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="bi bi-trash"></i> Confirmar y Quitar
+                </button>
+                
+                <a asp-action="Edit" asp-route-id="@idPresupuesto" class="btn btn-secondary btn-lg">
+                    Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

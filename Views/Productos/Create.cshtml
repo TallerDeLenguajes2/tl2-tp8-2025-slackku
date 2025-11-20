@@ -1,7 +1,6 @@
 @{
     ViewData["Title"] = "Crear Producto";
 }
-
 @model Producto
 
 <div class="d-flex flex-column p-3 mb-5">
@@ -14,11 +13,14 @@
             <div class="card card-body mb-3 bg-light">
                 <div class="mb-3">
                     <label asp-for="Descripcion" class="form-label fw-normal">Descripcion</label>
-                    <input class="form-control" asp-for="Descripcion" required>
+                    <input class="form-control" asp-for="Descripcion" required placeholder="Mouse Logitech">
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
                     <label asp-for="Precio" class="form-label fw-normal">Precio unitario</label>
-                    <input type="number" min="0.01" step="any" class="form-control" asp-for="Precio" required>
+                    <input type="number" min="0.01" step="any" class="form-control" asp-for="Precio" required
+                        placeholder="1000">
+                    <span asp-validation-for="Precio" class="text-danger"></span>
                 </div>
             </div>
 
@@ -32,3 +34,7 @@
             </div>
         </form>
     </div>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+}

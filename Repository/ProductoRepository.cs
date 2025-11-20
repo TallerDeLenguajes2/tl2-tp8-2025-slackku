@@ -7,7 +7,7 @@ namespace tl2_tp8_2025_slackku.Repository
     public class ProductoRepository
     {
         private string connectionString = "DataSource=DB/Tienda.db;";
-        public bool Crear(ProductoDTO prod)
+        public bool Crear(Producto prod)
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
@@ -21,6 +21,7 @@ namespace tl2_tp8_2025_slackku.Repository
             // connection.Close(); No hace falta por el using con connection, al salir del scope se cierra
             return command.ExecuteNonQuery() == 1;
         }
+        
         public bool Modificar(Producto pModified)
         {
             SqliteConnection connection = new SqliteConnection(connectionString);

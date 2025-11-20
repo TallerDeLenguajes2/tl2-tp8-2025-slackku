@@ -7,37 +7,19 @@ namespace tl2_tp8_2025_slackku.Repository
     public class PresupuestoRepository
     {
         private string connectionString = "DataSource=DB/Tienda.db;";
-        public bool Crear(PresupuestoDTO presu) // Recibimos un presupuesto [con carga del detalle dentro]
+        public bool Crear(Presupuesto presu) // Recibimos un presupuesto [con carga del detalle dentro]
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
-            using var transaction = connection.BeginTransaction();
 
             string queryStringPresupuesto = "INSERT INTO Presupuestos (NombreDestinatario, FechaCreacion) VALUES(@name, @date); SELECT last_insert_rowid();";
 
-            var commandFirst = new SqliteCommand(queryStringPresupuesto, connection);
-            commandFirst.Transaction = transaction;
+            var command = new SqliteCommand(queryStringPresupuesto, connection);
 
-            commandFirst.Parameters.AddWithValue("@name", presu.NombreDestinatario);
-            commandFirst.Parameters.AddWithValue("@date", presu.FechaCreacion);
+            command.Parameters.AddWithValue("@name", presu.NombreDestinatario);
+            command.Parameters.AddWithValue("@date", presu.FechaCreacion);
 
-            var idPresupuestoGenerado = (long)commandFirst.ExecuteScalar();
-
-            string queryStringPresupuestoDetalle = "INSERT INTO PresupuestosDetalle (idProducto, idPresupuesto, Cantidad) VALUES(@idProd, @idPresu, @cant)";
-
-            int adderCheck = 0;
-            presu.Detalle.ForEach(d =>
-            {
-                var commandLast = new SqliteCommand(queryStringPresupuestoDetalle, connection, transaction);
-                commandLast.Transaction = transaction;
-                commandLast.Parameters.AddWithValue("@idProd", d.Producto.IdProducto);
-                commandLast.Parameters.AddWithValue("@idPresu", idPresupuestoGenerado);
-                commandLast.Parameters.AddWithValue("@cant", d.Cantidad);
-
-                adderCheck += commandLast.ExecuteNonQuery();
-            });
-            transaction.Commit();
-            return presu.Detalle.Count() == adderCheck;
+            return command.ExecuteNonQuery() == 1;
         }
 
         public List<Presupuesto> Listar()
@@ -57,7 +39,6 @@ namespace tl2_tp8_2025_slackku.Repository
 
         private List<Presupuesto> MapearPresupuestos(SqliteDataReader reader)
         {
-            List<Presupuesto> listaPresupuesto = new();
             var presupuestosDict = new Dictionary<int, Presupuesto>();
             while (reader.Read())
             {
@@ -128,7 +109,7 @@ namespace tl2_tp8_2025_slackku.Repository
             return presupuesto;
         }
 
-        public bool Agregar(int idPresupuesto, Producto prod, int cantidad)
+        public bool AgregarDetalle(int idPresupuesto, int idProducto, int cantidad)
         {
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
@@ -137,11 +118,36 @@ namespace tl2_tp8_2025_slackku.Repository
             using var command = new SqliteCommand(queryString, connection);
 
             command.Parameters.AddWithValue("@idPresu", idPresupuesto);
-            command.Parameters.AddWithValue("@idProd", prod.IdProducto);
+            command.Parameters.AddWithValue("@idProd", idProducto);
             command.Parameters.AddWithValue("@cant", cantidad);
 
             return command.ExecuteNonQuery() == 1;
         }
+
+        public bool EliminarDetalle(int idPresupuesto, int idProducto)
+        {
+            using var connection = new SqliteConnection(connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                string queryDetalle = @"DELETE FROM PresupuestosDetalle 
+                                        WHERE idPresupuesto = @idPresupuesto 
+                                        AND idProducto = @idProducto";
+                using var commandDetalle = new SqliteCommand(queryDetalle, connection, transaction);
+                commandDetalle.Parameters.AddWithValue("@idPresupuesto", idPresupuesto);
+                commandDetalle.Parameters.AddWithValue("@idProducto", idProducto);
+                int flag = commandDetalle.ExecuteNonQuery();
+                transaction.Commit();
+                return flag == 1;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
         public bool Eliminar(int id)
         {
             using var connection = new SqliteConnection(connectionString);
@@ -152,14 +158,14 @@ namespace tl2_tp8_2025_slackku.Repository
                 string queryDetalle = "DELETE FROM PresupuestosDetalle WHERE idPresupuesto = @id";
                 using var commandDetalle = new SqliteCommand(queryDetalle, connection, transaction);
                 commandDetalle.Parameters.AddWithValue("@id", id);
-                commandDetalle.ExecuteNonQuery();
+                int flag = commandDetalle.ExecuteNonQuery();
 
                 string queryPresupuesto = "DELETE FROM Presupuestos WHERE idPresupuesto = @id";
                 using var commandPresupuesto = new SqliteCommand(queryPresupuesto, connection, transaction);
                 commandPresupuesto.Parameters.AddWithValue("@id", id);
                 int afectados = commandPresupuesto.ExecuteNonQuery();
                 transaction.Commit();
-                return afectados > 0;
+                return afectados > 0 && flag == 1;
             }
             catch (Exception)
             {
@@ -176,19 +182,36 @@ namespace tl2_tp8_2025_slackku.Repository
             using var transaction = connection.BeginTransaction();
             try
             {
-                foreach (PresupuestoDetalle det in pModified.Detalle)
+                // Primero actualizamos los campos del presupuesto (cabecera)
+                string queryHeader = @"UPDATE Presupuestos 
+                                        SET NombreDestinatario = @name, FechaCreacion = @date 
+                                        WHERE idPresupuesto = @id";
+                using (var cmdHeader = new SqliteCommand(queryHeader, connection, transaction))
                 {
-                    string queryString = @"UPDATE PresupuestosDetalle 
-                                        SET Cantidad = @cantidad 
-                                        WHERE idPresupuesto = @id AND idProducto = @idProd";
-
-                    var command = new SqliteCommand(queryString, connection, transaction);
-                    command.Parameters.AddWithValue("@id", pModified.IdPresupuesto);
-                    command.Parameters.AddWithValue("@idProd", det.Producto.IdProducto);
-                    command.Parameters.AddWithValue("@cantidad", det.Cantidad);
-
-                    command.ExecuteNonQuery();
+                    cmdHeader.Parameters.AddWithValue("@name", pModified.NombreDestinatario);
+                    cmdHeader.Parameters.AddWithValue("@date", pModified.FechaCreacion);
+                    cmdHeader.Parameters.AddWithValue("@id", pModified.IdPresupuesto);
+                    cmdHeader.ExecuteNonQuery();
                 }
+
+                // Si hay detalles, actualizamos las cantidades existentes.
+                if (pModified.Detalle != null && pModified.Detalle.Any())
+                {
+                    foreach (PresupuestoDetalle det in pModified.Detalle)
+                    {
+                        string queryString = @"UPDATE PresupuestosDetalle 
+                                            SET Cantidad = @cantidad 
+                                            WHERE idPresupuesto = @id AND idProducto = @idProd";
+
+                        var command = new SqliteCommand(queryString, connection, transaction);
+                        command.Parameters.AddWithValue("@id", pModified.IdPresupuesto);
+                        command.Parameters.AddWithValue("@idProd", det.Producto.IdProducto);
+                        command.Parameters.AddWithValue("@cantidad", det.Cantidad);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
                 transaction.Commit();
             }
             catch (Exception ex)
