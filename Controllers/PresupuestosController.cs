@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using tl2_tp8_2025_slackku.Interfaces;
 using tl2_tp8_2025_slackku.Models;
 using tl2_tp8_2025_slackku.Repository;
 using tl2_tp8_2025_slackku.ViewModels;
@@ -8,27 +9,55 @@ namespace tl2_tp8_2025_slackku.Controllers
 {
     public class PresupuestosController : Controller
     {
-        private readonly ILogger<PresupuestosController> _logger;
-
-        private PresupuestoRepository repository;
+        private IPresupuestoRepository repository;
+        private IAuthenticationService _authService;
         // Necesitamos el repositorio de Productos para llenar el dropdown
         private readonly ProductoRepository _productoRepo = new ProductoRepository();
-        public PresupuestosController(ILogger<PresupuestosController> logger)
+        public PresupuestosController(IPresupuestoRepository presRepo, IAuthenticationService authService)
         {
-            _logger = logger;
-            repository = new PresupuestoRepository();
+            _authService = authService;
+            repository = presRepo;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
-            List<Presupuesto> presupuesto = repository.Listar();
-            return View(presupuesto);
+            if (!_authService.IsAuthenticated())
+                return RedirectToAction("Index", "Login");
+
+            // Verifica Nivel de acceso que necesite validar
+            if (_authService.HasAccessLevel("Administrador") || _authService.HasAccessLevel("Cliente"))
+            {
+                //si es es valido entra sino vuelve a login
+                List<Presupuesto> presupuestos = repository.Listar();
+                return View(presupuestos);
+            }
+            else
+                return RedirectToAction("Index", "Login");
+        }
+
+        private IActionResult CheckAdminPermissions()
+        {
+            // 1. No logueado? -> vuelve al login
+            if (!_authService.IsAuthenticated())
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            // 2. No es Administrador? -> Da Error
+            if (!_authService.HasAccessLevel("Administrador"))
+            {
+                // Llamamos a AccesoDenegado (llama a la vista correspondiente de Productos)
+                return RedirectToAction(nameof(AccesoDenegado));
+            }
+            return View(new PresupuestoViewModel()); // Permiso concedido
         }
 
         [HttpGet]
         public IActionResult Create()
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             ProductoRepository productoRepository = new();
             var productos = productoRepository.Listar();
             ViewBag.Productos = productos;
@@ -38,6 +67,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost]
         public IActionResult Create(PresupuestoViewModel presupuestoVM)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             ModelState.Remove("IdPresupuesto");
             ModelState.Remove("FechaCreacion");
 
@@ -69,6 +101,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Presupuesto pres = repository.Obtener(id);
             if (pres != null)
                 return View(pres);
@@ -79,6 +114,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost]
         public IActionResult Edit(int id, PresupuestoViewModel presupuestoVM, List<PresupuestoDetalle> detalle)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             if (id != presupuestoVM.IdPresupuesto) return NotFound();
 
             var keys = ModelState.Keys.Where(k => k.StartsWith("Detalle") || k.StartsWith("detalle")).ToList();
@@ -122,6 +160,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Presupuesto pres = repository.Obtener(id);
             if (pres != null)
                 return View(pres);
@@ -131,6 +172,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmation(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Presupuesto pres = repository.Obtener(id);
             if (pres != null)
                 repository.Eliminar(id);
@@ -193,6 +237,9 @@ namespace tl2_tp8_2025_slackku.Controllers
             return RedirectToAction("Index");
         }
 
+        public IActionResult AccesoDenegado()
+        {
+            return View();
+        }
     }
-
 }

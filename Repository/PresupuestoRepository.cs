@@ -1,10 +1,11 @@
 using System.Transactions;
 using Microsoft.Data.Sqlite;
+using tl2_tp8_2025_slackku.Interfaces;
 using tl2_tp8_2025_slackku.Models;
 
 namespace tl2_tp8_2025_slackku.Repository
 {
-    public class PresupuestoRepository
+    public class PresupuestoRepository : IPresupuestoRepository
     {
         private string connectionString = "DataSource=DB/Tienda.db;";
         public bool Crear(Presupuesto presu) // Recibimos un presupuesto [con carga del detalle dentro]

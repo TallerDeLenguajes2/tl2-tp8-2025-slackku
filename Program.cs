@@ -1,24 +1,43 @@
+using tl2_tp8_2025_slackku.Repository;
+using tl2_tp8_2025_slackku.Interfaces;
+using tl2_tp8_2025_slackku.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// Servicios de Sesión y Acceso a Contexto (CLAVE para la autenticación)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+builder.Services.AddScoped<IPresupuestoRepository, PresupuestoRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
+app.UseRouting();
+app.UseSession();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
-app.UseAuthorization();
+
+
+
 
 app.MapControllerRoute(
     name: "default",
@@ -29,6 +48,11 @@ app.MapControllerRoute(
     pattern: "{controller=Productos}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
-name: "Presupuesto",
-pattern: "{controller=Presupuestos}/{action=Index}/{id?}");
+    name: "Presupuesto",
+    pattern: "{controller=Presupuestos}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "Login",
+    pattern: "{controller=Login}");
+
 app.Run();

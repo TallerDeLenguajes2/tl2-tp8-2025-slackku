@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using tl2_tp8_2025_slackku.Interfaces;
 using tl2_tp8_2025_slackku.Models;
 using tl2_tp8_2025_slackku.Repository;
 using tl2_tp8_2025_slackku.ViewModels;
@@ -7,30 +8,55 @@ namespace tl2_tp8_2025_slackku.Controllers
 {
     public class ProductosController : Controller
     {
-        private readonly ILogger<ProductosController> _logger;
-        private ProductoRepository repository;
-        public ProductosController(ILogger<ProductosController> logger)
+        private IProductoRepository repository;
+        private IAuthenticationService _authService;
+        public ProductosController(IProductoRepository prodRepo, IAuthenticationService authService)
         {
-            _logger = logger;
-            repository = new ProductoRepository();
+            _authService = authService;
+            repository = prodRepo;
         }
 
         [HttpGet]
         public IActionResult Index() // Listar Todos
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             List<Producto> productos = repository.Listar();
             return View(productos);
+        }
+
+        private IActionResult CheckAdminPermissions()
+        {
+            // 1. No logueado? -> vuelve al login
+            if (!_authService.IsAuthenticated())
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            // 2. No es Administrador? -> Da Error
+            if (!_authService.HasAccessLevel("Administrador"))
+            {
+                // Llamamos a AccesoDenegado (llama a la vista correspondiente de Productos)
+                return RedirectToAction(nameof(AccesoDenegado));
+            }
+            return null; // Permiso concedido
         }
 
         [HttpGet]
         public IActionResult Create()
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             return View();
         }
 
         [HttpPost]
         public IActionResult Create(ProductoViewModel productoVM)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             if (!ModelState.IsValid)
             {
                 return View(productoVM);
@@ -50,6 +76,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Producto prod = repository.Obtener(id);
             if (prod != null)
                 return View(prod);
@@ -59,6 +88,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost]
         public IActionResult Edit(int id, ProductoViewModel productoVM)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             if (id != productoVM.IdProducto) return NotFound();
 
             if (!ModelState.IsValid)
@@ -78,6 +110,9 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Producto prod = repository.Obtener(id);
             if (prod != null)
                 return View(prod);
@@ -87,10 +122,18 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirmation(int id)
         {
+            var securityCheck = CheckAdminPermissions();
+            if (securityCheck != null) return securityCheck;
+
             Producto prod = repository.Obtener(id);
             if (prod != null)
                 repository.Eliminar(id);
             return RedirectToAction("Index");
+        }
+
+        public IActionResult AccesoDenegado()
+        {
+            return View();
         }
 
     }

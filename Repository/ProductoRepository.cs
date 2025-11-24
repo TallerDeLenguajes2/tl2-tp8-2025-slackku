@@ -1,10 +1,11 @@
 using Microsoft.Data.Sqlite;
 using tl2_tp8_2025_slackku.Models;
 using SQLitePCL;
+using tl2_tp8_2025_slackku.Interfaces;
 
 namespace tl2_tp8_2025_slackku.Repository
 {
-    public class ProductoRepository
+    public class ProductoRepository : IProductoRepository
     {
         private string connectionString = "DataSource=DB/Tienda.db;";
         public bool Crear(Producto prod)
@@ -21,7 +22,7 @@ namespace tl2_tp8_2025_slackku.Repository
             // connection.Close(); No hace falta por el using con connection, al salir del scope se cierra
             return command.ExecuteNonQuery() == 1;
         }
-        
+
         public bool Modificar(Producto pModified)
         {
             SqliteConnection connection = new SqliteConnection(connectionString);
@@ -36,7 +37,7 @@ namespace tl2_tp8_2025_slackku.Repository
 
             return command.ExecuteNonQuery() == 1;
         }
-        
+
         public List<Producto> Listar()
         {
             using var connection = new SqliteConnection(connectionString);
