@@ -27,8 +27,8 @@ namespace tl2_tp8_2025_slackku.Repository
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
             string queryString = @"SELECT * FROM Presupuestos 
-                                    INNER JOIN PresupuestosDetalle USING(idPresupuesto)
-                                    INNER JOIN Productos USING(idProducto)";
+                                    LEFT JOIN PresupuestosDetalle USING(idPresupuesto)
+                                    LEFT JOIN Productos USING(idProducto)";
 
             using var command = new SqliteCommand(queryString, connection);
 
@@ -43,6 +43,8 @@ namespace tl2_tp8_2025_slackku.Repository
             while (reader.Read())
             {
                 int idPresupuesto = Convert.ToInt32(reader["idPresupuesto"]);
+
+                // Si es la primera vez que vemos este presupuesto, lo creamos
                 if (!presupuestosDict.ContainsKey(idPresupuesto))
                 {
                     var presupuesto = new Presupuesto
@@ -55,18 +57,24 @@ namespace tl2_tp8_2025_slackku.Repository
                     presupuestosDict.Add(idPresupuesto, presupuesto);
                 }
 
-                var prod = new Producto
+                // --- CORRECCIÓN CLAVE ---
+                // Verificamos si la columna 'idProducto' NO es nula (DBNull)
+                // Si es nula, significa que el presupuesto no tiene productos, así que no hacemos nada.
+                if (reader["idProducto"] != DBNull.Value)
                 {
-                    IdProducto = Convert.ToInt32(reader["idProducto"]),
-                    Descripcion = reader["Descripcion"].ToString(),
-                    Precio = Convert.ToDouble(reader["Precio"])
-                };
-                var detalle = new PresupuestoDetalle
-                {
-                    Producto = prod,
-                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
-                };
-                presupuestosDict[idPresupuesto].Detalle.Add(detalle);
+                    var prod = new Producto
+                    {
+                        IdProducto = Convert.ToInt32(reader["idProducto"]),
+                        Descripcion = reader["Descripcion"].ToString(),
+                        Precio = Convert.ToDouble(reader["Precio"])
+                    };
+                    var detalle = new PresupuestoDetalle
+                    {
+                        Producto = prod,
+                        Cantidad = Convert.ToInt32(reader["Cantidad"]),
+                    };
+                    presupuestosDict[idPresupuesto].Detalle.Add(detalle);
+                }
             }
             return presupuestosDict.Values.ToList();
         }
@@ -76,13 +84,19 @@ namespace tl2_tp8_2025_slackku.Repository
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
-            string queryString = "SELECT * FROM Presupuestos INNER JOIN PresupuestosDetalle USING(idPresupuesto) INNER JOIN Productos USING(idProducto) WHERE idPresupuesto = @id";
-            using var command = new SqliteCommand(queryString, connection);
+            // Asegúrate de que la consulta tenga LEFT JOIN
+            string queryString = @"SELECT * FROM Presupuestos 
+                           LEFT JOIN PresupuestosDetalle USING(idPresupuesto) 
+                           LEFT JOIN Productos USING(idProducto) 
+                           WHERE idPresupuesto = @id";
 
+            using var command = new SqliteCommand(queryString, connection);
             command.Parameters.AddWithValue("@id", id);
 
             using var reader = command.ExecuteReader();
+
             Presupuesto presupuesto = null;
+
             while (reader.Read())
             {
                 if (presupuesto == null)
@@ -95,16 +109,20 @@ namespace tl2_tp8_2025_slackku.Repository
                         Detalle = new List<PresupuestoDetalle>()
                     };
                 }
-                presupuesto.Detalle.Add(new PresupuestoDetalle
+
+                if (reader["idProducto"] != DBNull.Value)
                 {
-                    Cantidad = Convert.ToInt32(reader["Cantidad"]),
-                    Producto = new Producto
+                    presupuesto.Detalle.Add(new PresupuestoDetalle
                     {
-                        IdProducto = Convert.ToInt32(reader["idProducto"]),
-                        Descripcion = reader["Descripcion"].ToString(),
-                        Precio = Convert.ToDouble(reader["Precio"])
-                    },
-                });
+                        Cantidad = Convert.ToInt32(reader["Cantidad"]),
+                        Producto = new Producto
+                        {
+                            IdProducto = Convert.ToInt32(reader["idProducto"]),
+                            Descripcion = reader["Descripcion"].ToString(),
+                            Precio = Convert.ToDouble(reader["Precio"])
+                        },
+                    });
+                }
             }
             return presupuesto;
         }

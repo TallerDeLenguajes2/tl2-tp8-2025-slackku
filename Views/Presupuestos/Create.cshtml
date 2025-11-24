@@ -1,8 +1,10 @@
+@using tl2_tp8_2025_slackku.ViewModels
 @{
     ViewData["Title"] = "Crear Presupuesto";
 }
 
-@model Presupuesto
+
+@model PresupuestoViewModel
 
 <div class="d-flex flex-column p-3 mb-5">
     <h3>Crear Presupuesto</h3>
@@ -18,10 +20,11 @@
                         <input class="form-control" asp-for="NombreDestinatario" required placeholder="Ej: Juan Pérez">
                         <span asp-validation-for="NombreDestinatario" class="text-danger"></span>
                     </div>
+                    
                     <div class="mb-3 col-md-6">
-                        <label asp-for="FechaCreacion" class="form-label fw-normal">Fecha Creacion</label>
+                        <label asp-for="FechaCreacion" class="form-label fw-normal">Fecha Creación</label>
                         <input class="form-control" type="date" asp-for="FechaCreacion"
-                            value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly>
                         <span asp-validation-for="FechaCreacion" class="text-danger"></span>
                     </div>
                 </div>
@@ -38,3 +41,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

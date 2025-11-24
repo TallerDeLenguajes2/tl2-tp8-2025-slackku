@@ -38,8 +38,12 @@ namespace tl2_tp8_2025_slackku.Controllers
         [HttpPost]
         public IActionResult Create(PresupuestoViewModel presupuestoVM)
         {
+            ModelState.Remove("IdPresupuesto");
+            ModelState.Remove("FechaCreacion");
+
             if (!ModelState.IsValid)
             {
+                Console.WriteLine("No valido!");
                 return View(presupuestoVM);
             }
 
@@ -49,7 +53,9 @@ namespace tl2_tp8_2025_slackku.Controllers
                 FechaCreacion = DateTime.Now,
             };
 
-            repository.Crear(presupuesto);
+
+            if (!repository.Crear(presupuesto))
+                Console.WriteLine("Error al crear");
             return RedirectToAction(nameof(Index));
         }
 
